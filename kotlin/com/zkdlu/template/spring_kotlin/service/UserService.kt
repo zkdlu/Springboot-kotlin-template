@@ -27,12 +27,11 @@ class UserService(@Autowired val userRepository:UserRepository) {
     }
 
     fun getUser(key: Int): UserVO? {
-        val user = userRepository.findById(key)
-        val data: User?
+        val result = userRepository.findById(key)
 
         return try {
-            data = user.get()
-            data.convertToVO() as UserVO
+            val user: User? = result.get()
+            user?.convertToVO() as UserVO
         } catch (exception:Exception) {
             println(exception.message)
             null
@@ -40,16 +39,23 @@ class UserService(@Autowired val userRepository:UserRepository) {
     }
 
     fun updateUser(key: Int, userVo: UserVO): UserVO? {
-        val user:User? = userRepository.findById(key).get()
+        val result = userRepository.findById(key)
 
-        user?.name = userVo.name
-        user?.password = userVo.password
 
-        user?.let {
-            return userRepository.save(it).convertToVO() as UserVO
+        try {
+            val user: User? = result.get()
+            user?.name = userVo.name
+            user?.password = userVo.password
+
+            user?.let {
+                return userRepository.save(it).convertToVO() as UserVO
+            }
+
+            return null
+        } catch (exception:Exception){
+            println(exception.message)
+            return null
         }
-
-        return null
     }
 
     fun deleteUser(key: Int): Boolean {
